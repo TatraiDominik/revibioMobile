@@ -30,16 +30,16 @@ const bioList = () => {
                     />
                 </View>
             </View>
-            <View style={[globalStyles.flex_col, globalStyles.flex_centered, globalStyles.w_full, globalStyles.h_full, {padding:50}]}>
-                <Text>Your bio pages</Text>
-                <View style={[globalStyles.bg_zinc_700,globalStyles.flex_col, globalStyles.flex_centered, globalStyles.w_full, globalStyles.gap_5, {height:"60%", borderRadius:20}]}>
+            <View style={[globalStyles.flex_col, globalStyles.flex_centered, globalStyles.w_full, globalStyles.h_full, globalStyles.gap_5, {padding:50}]}>
+                <Text style={[globalStyles.text_4xl, globalStyles.text_zinc_100]}>Your bio pages</Text>
+                <View style={[globalStyles.bg_zinc_700,globalStyles.flex_col, globalStyles.flex_centered, globalStyles.w_full, globalStyles.gap_5, {height:"70%", borderRadius:20}]}>
                         <Image
                             source={currentPfp}  
                             style={{ width: 100, height: 100, borderRadius: "100%", objectFit: 'cover' }} 
                             alt="Profile Picture"
                         />
                         
-                        <Text style={[globalStyles.text_base, globalStyles.text_rose_500]}>@gasparalaszlo</Text>
+                        <Text style={[globalStyles.text_lg, globalStyles.text_rose_500]}>@gasparalaszlo</Text>
                 </View>
                 <Text style={[globalStyles.text_2xl, globalStyles.text_zinc_100]}>Gáspár László</Text>
                 <View style={[globalStyles.flex_row, globalStyles.flex_centered, globalStyles.gap_2]}>
