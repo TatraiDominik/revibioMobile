@@ -49,8 +49,14 @@ const globalStyles = StyleSheet.create({
     backgroundColor: "#18181b"
   },
   bg_zinc_700:{
-    backgroundColor: "#374151"
+    backgroundColor: "#3f3f46"
   },
+  bg_zinc_100:{
+    backgroundColor: "#f4f4f5"
+  },
+  bg_zinc_400:{
+    backgroundColor: "#a1a1aa"
+  }, 
   text_zinc_100:{
     color: "#f4f4f5"
   },
@@ -59,6 +65,9 @@ const globalStyles = StyleSheet.create({
   },  
   text_zinc_600:{
     color: "#52525b"
+  }, 
+  text_rose_500:{
+    color: "#f43f5e"
   }, 
   h_full:{
     height: "100%"
