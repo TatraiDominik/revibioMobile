@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Image, Text, ImageBackground, TouchableOpacity } from 'react-native';
+import { View, Image, Text, ImageBackground, TouchableOpacity, ScrollView } from 'react-native';
 import globalStyles from "@/assets/globalStyles";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
 
 const BACKEND_URL = 'http://65.87.7.245';  
 
@@ -15,14 +16,25 @@ const logOut = () => {
     router.push('/login');
 }
 
+interface Bio {
+    handle: string;
+    name: string;
+    widgets: number;
+    user: string;
+    createdAt: string;
+    updatedAt: string;
+    views: number;
+}
+
 const BioList = () => {
     const [avatar, setAvatarId] = useState<string | null>(null);
+    const [user, setUserName] = useState<string | null>(null);
+    const [bios, getBios] = useState<Bio[] | null>(null);
+    const [currentPage, setCurrentPage] = useState<number>(0); // Aktuális oldal indexe
 
     useEffect(() => {
-        
         const fetchUserData = async () => {
             try {
-                
                 const userToken = await AsyncStorage.getItem('user');
                 if (userToken) {
                     const decodedToken = jwtDecode(userToken) as { avatar?: string };
@@ -31,7 +43,6 @@ const BioList = () => {
                         setAvatarId(decodedToken.avatar);
                     }
                     
-                    
                     const storedUserData = await AsyncStorage.getItem('userdata');
                     if (storedUserData) {
                         const userData = JSON.parse(storedUserData);
@@ -39,17 +50,52 @@ const BioList = () => {
                         if (userData.avatar) {
                             setAvatarId(userData.avatar);
                         }
+                        if(userData.displayName){
+                            setUserName(userData.displayName);
+                        }
                     }
                 }
             } catch (error) {
                 console.error('Error fetching user data:', error);
             }
         };
-    
+
+        const fetchBios = async () => {
+            try {
+                const userToken = await AsyncStorage.getItem('user'); // Token lekérése
+                if (userToken) {
+                    const response = await axios.get(`${BACKEND_URL}/bio`, {
+                        headers: {
+                            'Authorization': `Bearer ${userToken}` // Token hozzáadása a kéréshez
+                        }
+                    });
+                    if (response && response.data) {
+                        getBios(response.data); // Frissítjük a bios állapotot
+                    }
+                }
+            } catch (error) {
+                console.log("Error while fetching bios:", error);
+            }
+        };
+        
         fetchUserData();
+        fetchBios();
     }, []);
 
-    // Use the avatar ID to construct the avatar URL, or use a default avatar if no ID exists
+    // Lapozás előző oldalra
+    const goToPreviousPage = () => {
+        if (currentPage > 0) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    // Lapozás következő oldalra
+    const goToNextPage = () => {
+        if (bios && currentPage < bios.length - 1) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
     const currentPfp = avatar ? `${BACKEND_URL}/file/${avatar}` : defaultPfp;
 
     return  (   
@@ -57,12 +103,12 @@ const BioList = () => {
             <TouchableOpacity onPress={logOut} style={[globalStyles.absolute, {top:10, left:10}]}>
                 <Text style={[globalStyles.text_rose_500, globalStyles.text_lg]}>Log out</Text>
             </TouchableOpacity>
+            <Text style={[globalStyles.text_2xl, globalStyles.text_zinc_100]}>Welcome {user}</Text>
             <ImageBackground 
                 source={bgPic}  
                 style={[globalStyles.flex_col, globalStyles.flex_centered, globalStyles.gap_5, globalStyles.relative, { height: '60%', width: "80%" }]}
                 imageStyle={{ borderRadius: 20, width: '100%', height: '100%', zIndex: 1 }} 
             >
-     
                 <View style={{ 
                     position: "absolute", 
                     top: 0, left: 0, right: 0, bottom: 0, 
@@ -77,21 +123,37 @@ const BioList = () => {
                         style={{ width: 200, height: 200, borderRadius: 100, objectFit: 'cover' }} 
                         alt="Profile Picture"
                     />
-                    <Text style={[globalStyles.text_lg, globalStyles.text_rose_500]}>@gasparalaszlo</Text>
+                    {bios && bios.length > 0 && (
+                        <Text style={[globalStyles.text_lg, globalStyles.text_rose_500]}>{bios[currentPage]?.handle}</Text>
+                    )}
                 </View>
-
-
-                <svg style={{ position: "absolute", zIndex: 0, filter: "blur(3rem)" }} width="110%" height="110%" viewBox="0 0 480 480" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M236.788 240C236.788 372.548 367.562 479.999 236.788 479.999C106.013 479.999 0 372.548 0 240C0 107.452 106.013 0 236.788 0C367.562 0 236.788 107.452 236.788 240Z" fill="#D4D4D8"/>
-                    <path d="M459.566 256.203C470.747 256.633 480.076 265.603 479.243 276.762C470.727 390.71 391.45 479.999 294.91 479.999C192.688 479.999 109.82 379.889 109.82 256.397C109.82 145.419 176.744 53.3249 264.496 35.7993C278.645 32.9733 288.469 47.7125 284.755 61.6556C259.033 158.232 316.864 250.71 459.566 256.203Z" fill="#E11D48"/>
-                </svg>
             </ImageBackground>
 
-            <Text style={[globalStyles.text_2xl, globalStyles.text_zinc_100]}>Gáspár László</Text>
+            {bios && bios.length > 0 && (
+                <Text style={[globalStyles.text_2xl, globalStyles.text_zinc_100]}>{bios[currentPage]?.name}</Text>
+            )}
+
+            {/* Lapozó indikátor */}
             <View style={[globalStyles.flex_row, globalStyles.flex_centered, globalStyles.gap_2]}>
-                <View style={[globalStyles.bg_zinc_400, { borderRadius: 5, height: 5, width: 20 }]}></View>
-                <View style={[globalStyles.bg_zinc_400, { borderRadius: 5, height: 5, width: 20 }]}></View>
-                <View style={[globalStyles.bg_zinc_400, { borderRadius: 5, height: 5, width: 20 }]}></View>
+                {bios && bios.map((_, index) => (
+                    <View
+                        key={index}
+                        style={[
+                            globalStyles.bg_zinc_400, 
+                            { borderRadius: 5, height: 5, width: 20, opacity: index === currentPage ? 1 : 0.5 }
+                        ]}
+                    />
+                ))}
+            </View>
+
+            {/* Lapozó gombok */}
+            <View style={[globalStyles.flex_row, globalStyles.flex_centered, globalStyles.gap_2, { marginTop: 20 }]}>
+                <TouchableOpacity onPress={goToPreviousPage} style={[globalStyles.bg_zinc_400, { borderRadius: 5, padding: 10 }]}>
+                    <Text style={[globalStyles.text_zinc_100]}>Previous</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={goToNextPage} style={[globalStyles.bg_zinc_400, { borderRadius: 5, padding: 10 }]}>
+                    <Text style={[globalStyles.text_zinc_100]}>Next</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
