@@ -8,11 +8,12 @@ interface InputProps {
     disabled?: boolean;
     icon?: string;
     styleclass?: "error" | "none";
+    value: string; 
+    onChangeText: (text: string) => void;
+    secureTextEntry?: boolean; 
 }
 
-const Input: React.FC<InputProps> = ({ type = "text", placeholder = "Enter text", disabled = false, icon, styleclass }) => {
-    const [text, setText] = useState('');
-
+const Input: React.FC<InputProps> = ({ type = "text", placeholder = "Enter text", disabled = false, icon, styleclass, value, onChangeText, secureTextEntry }) => {
     return (
         <View style={[styles.inputContainer, styleclass === 'error' && styles.error]}>
             {icon && (
@@ -22,10 +23,10 @@ const Input: React.FC<InputProps> = ({ type = "text", placeholder = "Enter text"
             )}
             <TextInput
                 placeholder={placeholder}
-                value={text}
-                onChangeText={setText}
+                value={value}
+                onChangeText={onChangeText}
                 style={styles.input}
-                secureTextEntry={type === 'password'}
+                secureTextEntry={secureTextEntry} 
                 editable={!disabled}
             />
         </View>

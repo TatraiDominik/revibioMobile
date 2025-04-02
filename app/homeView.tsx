@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import globalStyles from '@/assets/globalStyles';
 import Button from '@/components/global/Button';
 import { Link } from 'expo-router';
+import React from 'react';
 
 
 const HomeView = () => {

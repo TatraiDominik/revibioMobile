@@ -2,11 +2,27 @@ import globalStyles from "@/assets/globalStyles";
 import Button from "@/components/global/Button";
 import Input from "@/components/global/Input";
 import { Link } from "expo-router";
-import { View,Text, Touchable, TouchableOpacity } from "react-native"
+import { View, Text, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
 
-const register = () =>{
-    return(
-        <View style={[globalStyles.flex_col, globalStyles.flex_centered, globalStyles.bg_zinc_900, globalStyles.h_full, globalStyles.w_full, globalStyles.relative, {paddingHorizontal:20}]}>
+const Register = () => {
+    const [displayName, setDisplayName] = useState(""); // Updated the state variable name
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState(""); // Added for confirmation password
+    
+    const handleRegister = () => {
+        // Add logic for registration, such as validation and API call
+        if (password !== confirmPassword) {
+            alert("Passwords do not match");
+            return;
+        }
+        
+        // Proceed with registration logic
+    };
+
+    return (
+        <View style={[globalStyles.flex_col, globalStyles.flex_centered, globalStyles.bg_zinc_900, globalStyles.h_full, globalStyles.w_full, globalStyles.relative, { paddingHorizontal: 20 }]}>
             <Link href="/homeView" style={[globalStyles.absolute, {top:20, left:20}]}>
                 <svg width="100" height="37" viewBox="0 0 150 37" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g clip-path="url(#clip0_626_1123)">
@@ -23,36 +39,32 @@ const register = () =>{
                 </svg>
             </Link>
 
-            <View style={ {marginBottom:50}}>
+            <View style={{ marginBottom: 50 }}>
                 <Text style={[globalStyles.text_4xl, globalStyles.text_zinc_100]}>Create an account</Text>
                 <Text style={[globalStyles.text_base, globalStyles.text_zinc_400]}>
                     Welcome to revi.bio! You can start by completing the form below to register your account.
                 </Text>
             </View>
 
-            <View style={[globalStyles.w_full, globalStyles.flex_col, globalStyles.flex_Start, globalStyles.gap_2, {marginBottom:50}]}>
-                <View style={[{marginBottom:50}, globalStyles.w_full, globalStyles.gap_5] }>
-                    <Input type="text" placeholder="Display name"></Input>
-                    <Input type="email" placeholder="E-mail"></Input>
-                    <Input type="password" placeholder="Password"></Input>
-                    <Input type="password" placeholder="Confirm password"></Input>
+            <View style={[globalStyles.w_full, globalStyles.flex_col, globalStyles.flex_Start, globalStyles.gap_2, { marginBottom: 50 }]}>
+                <View style={[{ marginBottom: 50 }, globalStyles.w_full, globalStyles.gap_5]}>
+                    <Input type="text" placeholder="Display name" value={displayName} onChangeText={setDisplayName} />
+                    <Input type="email" placeholder="E-mail" value={email} onChangeText={setEmail} />
+                    <Input type="password" placeholder="Password" value={password} onChangeText={setPassword} />
+                    <Input type="password" placeholder="Confirm password" value={confirmPassword} onChangeText={setConfirmPassword} />
                 </View>
 
                 <View style={[globalStyles.w_full, globalStyles.flex_row, globalStyles.flex_centered, globalStyles.gap_5]}>
-                    <Button rank="primary" text="Register"></Button>
+                    <Button rank="primary" text="Register" onPress={handleRegister} />
                     <TouchableOpacity>
                         <Link href="/login" style={[globalStyles.w_full]}>
                             <Text style={[globalStyles.text_zinc_400, globalStyles.text_base]}>Or Log in</Text>
                         </Link>
                     </TouchableOpacity>
                 </View>
-
-            </View>
-            <View>
-                
             </View>
         </View>
-    )
-}
+    );
+};
 
-export default register;
+export default Register;

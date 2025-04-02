@@ -1,21 +1,23 @@
-import { View, Text, StyleSheet } from 'react-native';  
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';  
 import globalStyles from '@/assets/globalStyles';
+import React from 'react';
 
-
-type ButtonType = {
+interface ButtonProps {
     rank: string;
     text: string;
+    onPress?: () => void; 
+    disabled?: boolean;
 }
 
-const Button = ({ rank, text }: ButtonType) => {
+const Button: React.FC<ButtonProps> = ({ rank, text, onPress, disabled }) => {
     const buttonStyle = rank === 'primary' ? buttonStyles.primary : buttonStyles.secondary;
 
     return (
-        <View style={[buttonStyle, globalStyles.flex_centered, {cursor:"pointer"}]}>
-            <Text style={[globalStyles.text_zinc_100, globalStyles.text_base]}>{text}</Text>  
-        </View>
+        <TouchableOpacity onPress={onPress} disabled={disabled} style={[buttonStyle, { opacity: disabled ? 0.5 : 1 }]}>
+            <Text style={globalStyles.text_zinc_100}>{text}</Text> 
+        </TouchableOpacity>
     );
-}
+};
 
 const buttonStyles = StyleSheet.create({
     primary: {

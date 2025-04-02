@@ -1,12 +1,76 @@
-import globalStyles from "@/assets/globalStyles";
-import Button from "@/components/global/Button";
-import Input from "@/components/global/Input";
-import { Link } from "expo-router";
-import { View,Text, Touchable, TouchableOpacity } from "react-native"
+import { Link, useRouter } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Alert, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Button from '@/components/global/Button';
+import Input from '@/components/global/Input';
+import globalStyles from '@/assets/globalStyles';
+import axios from 'axios';
 
-const login = () =>{
-    return(
-        <View style={[globalStyles.flex_col, globalStyles.flex_centered, globalStyles.bg_zinc_900, globalStyles.h_full, globalStyles.w_full, globalStyles.relative, {paddingHorizontal:20}]}>
+const Login = () => {
+    const BACKEND_URL = 'http://65.87.7.245'; 
+    const router = useRouter(); 
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    // State to hold user data after successful login
+    const [userData, setUserData] = useState(null);
+
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert('Hiba', 'Kérlek töltsd ki az összes mezőt.');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await axios.post(`${BACKEND_URL}/auth/login`, {
+                email,
+                password,
+            });
+
+            const jwt = response.data.jwt;
+            if (jwt) {
+                
+                await AsyncStorage.setItem('user', jwt);
+                await localStorage.setItem('user', jwt)
+                
+                const userResponse = await axios.get(`${BACKEND_URL}/user/@me`, {
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                    },
+                });
+
+                
+                setUserData(userResponse.data);
+                await AsyncStorage.setItem("userdata", JSON.stringify(userResponse.data));
+                
+                router.push('/bioList');
+            } else {
+                Alert.alert('Hiba', 'Hibás bejelentkezési adatok.');
+            }
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                Alert.alert('Bejelentkezés sikertelen', error.response?.data?.message || 'Hiba történt.');
+            } else if (error instanceof Error) {
+                Alert.alert('Bejelentkezés sikertelen', error.message);
+            } else {
+                Alert.alert('Bejelentkezés sikertelen', 'Ismeretlen hiba történt.');
+            }
+        } finally {
+            setLoading(false); 
+        }
+    };
+
+    return  (
+        <View style={[
+            globalStyles.flex_col, globalStyles.flex_centered,
+            globalStyles.bg_zinc_900, globalStyles.h_full,
+            globalStyles.w_full, { paddingHorizontal: 20 }
+        ]}>
             <Link href="/homeView" style={[globalStyles.absolute, {top:20, left:20}]}>
                 <svg width="100" height="37" viewBox="0 0 150 37" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g clip-path="url(#clip0_626_1123)">
@@ -22,35 +86,29 @@ const login = () =>{
             </defs>
                 </svg>
             </Link>
-
-            <View style={ {marginBottom:50}}>
+            <View style={{ marginBottom: 50 }}>
                 <Text style={[globalStyles.text_4xl, globalStyles.text_zinc_100]}>Welcome back!</Text>
                 <Text style={[globalStyles.text_base, globalStyles.text_zinc_400]}>
-                    Let’s continue where you left off. Forgot your password? Click here to start the password reset process.
+                Let’s continue where you left off. Forgot your password? Click here to start the password reset process.
                 </Text>
             </View>
 
-            <View style={[globalStyles.w_full, globalStyles.flex_col, globalStyles.flex_Start, globalStyles.gap_2, {marginBottom:50}]}>
-                <View style={[{marginBottom:50}, globalStyles.w_full, globalStyles.gap_5] }>
-                    <Input type="email" placeholder="E-mail"></Input>
-                    <Input type="password" placeholder="Password"></Input>
-                </View>
-
-                <View style={[globalStyles.w_full, globalStyles.flex_row, globalStyles.flex_centered, globalStyles.gap_5]}>
-                    <Button rank="primary" text="Log in"></Button>
-                    <TouchableOpacity>
-                        <Link href="/register" style={[globalStyles.w_full]}>
-                            <Text style={[globalStyles.text_zinc_400, globalStyles.text_base]}>Or create an account</Text>
-                        </Link>
-                    </TouchableOpacity>
-                </View>
+            <View style={[globalStyles.w_full, globalStyles.flex_col, { marginBottom: 50 }]}>                   
+            <Input type="email" placeholder="E-mail" value={email} onChangeText={setEmail} />
+            <Input type="password" placeholder="Jelszó" value={password} onChangeText={setPassword} secureTextEntry />
 
             </View>
-            <View>
-                
+
+            <View style={[globalStyles.w_full, globalStyles.flex_row, globalStyles.flex_centered, globalStyles.gap_5]}>
+                <Button rank="primary" text={loading ? "Bejelentkezés..." : "Bejelentkezés"} onPress={handleLogin} disabled={loading} />
+                <TouchableOpacity>
+                    <Link href="/register">
+                        <Text style={[globalStyles.text_zinc_400, globalStyles.text_base]}>Vagy hozz létre egy fiókot</Text>
+                    </Link>
+                </TouchableOpacity>
             </View>
         </View>
-    )
-}
+    );
+};
 
-export default login;
+export default Login;
